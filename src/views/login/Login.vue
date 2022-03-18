@@ -2,38 +2,32 @@
 	<div class="wrapper">
 		<div class="main">
 			<!-- 整个注册盒子 -->
-			<!-- <div class="manage">小白后台管理系统</div> -->
 			<div class="loginbox">
 				<!-- 左侧的注册盒子 -->
 				<div class="loginbox-in">
-					<div style="
-							justify-content: center;
-							display: flex;
-							font-size: 20px;
-							position: absolute;
-							top: 60px;
-							left: 20px;
-							font-size: 25px;
-						">
-						小白后台管理系统
-					</div>
-					<div class="userbox">
-						<span class="iconfont icon-200yonghu_yonghu"></span>
-						<input class="user" id="user" v-model="name" placeholder="用户名" />
-					</div>
-					<br />
-					<div class="pwdbox">
-						<span class="iconfont icon-yuechi"></span>
-						<input class="pwd" id="password" type="password" v-model="pwd" placeholder="密码" />
-					</div>
-					<br />
+					<div class="xblo">小白后台管理系统</div>
+					<el-form :model="loginParam" :rules="rules" ref="loginForm" label-width="0px">
+						<div class="userbox">
+							<span class="iconfont icon-200yonghu_yonghu"  style="margin-right: 6px;"></span>
+							<el-form-item prop="username">
+								<el-input v-model="loginParam.username" placeholder="用户名"></el-input>
+							</el-form-item>
+						</div>
+						<br />
+						<div class="pwdbox">
+							<span class="iconfont icon-key1"></span>
+							<el-form-item prop="password">
+								<el-input type="password" v-model="loginParam.password" placeholder="密码"></el-input>
+							</el-form-item>
+						</div>
+						<br />
+					</el-form>
 					<div class="log-box">
 						<div class="log-box-text">忘记密码</div>
-						<button type="primary" class="login_btn" @click="login">
-							Login
+						<button type="primary" class="login_btn" @click="submitLoginForm('loginForm')">
+							登录
 						</button>
 					</div>
-
 					<br />
 					<div class="warn">@zybfsyqs</div>
 					<button type="primary" class="register_btn" @click="register">
@@ -66,68 +60,36 @@ export default {
 	props: {},
 	data () {
 		return {
-			name: '',
-			pwd: '',
-			user_list: [
-				{
-					id: '1',
-					username: 'admin',
-					password: '123'
-				}
-			]
+			loginParam: {},
+			rules: {
+				username: [
+					{ required: true, message: '请输入用户名', trigger: 'blur' },
+					{ min: 2, max: 32, message: '请输入2-20位字符', trigger: 'blur' }
+				],
+				password: [
+					{ required: true, message: '请输入密码', trigger: 'blur' },
+					{ min: 6, max: 32, message: '请输入6-32位字符', trigger: 'blur' }
+				]
+			}
 		}
 	},
 	watch: {},
 	computed: {},
 	methods: {
 		register () {
-			this.$router.push('Register')
+			this.$router.push('register')
 		},
-
-		// getParams: function () {
-		//         // 取到路由带过来的参数
-		//         var routerParams = this.$route.query.list;
-		//         this.user_list = routerParams;
-		// },
-		login () {
-			var flag = 0
-			//如果是有参数传递
-			if (!this.$route.query.list) {
-				this.user_list.forEach(item => {
-					if (item.username == this.name) {
-						if (item.password == this.pwd) {
-							flag = 1 //用户存在，并且密码正确
-						}
-					}
-				})
-				if (flag == 1) {
-					//可以跳转到主页
-					this.$router.push('index')
+		submitLoginForm (formName) {
+			this.$refs[formName].validate(valid => {
+				if (valid) {
+					console.log(this.loginParam)
 				} else {
-					alert('用户名或密码错误，请重新输入')
+					this.$message.error('请输入账号和密码')
+					this.loginParam = {}
+					return false
 				}
-			} else {
-				// 取到路由带过来的参数
-				var routerParams = this.$route.query.list
-				this.user_list = routerParams
-				this.user_list.forEach(item => {
-					if (item.username == this.name) {
-						if (item.password == this.pwd) {
-							flag = 1 //用户存在，并且密码正确
-						}
-					}
-				})
-				if (flag == 1) {
-					//可以跳转到主页
-					// this.$router.push("Homepage");
-					this.$router.push({
-						path: '"Homepage'
-					})
-				} else {
-					alert('用户名或密码错误，请重新输入')
-				}
-			}
-		}
+			})
+		},
 	},
 	created () { },
 	mounted () { }
@@ -144,6 +106,15 @@ export default {
 	height: 100%;
 	width: 100%;
 	background-color: #becfca !important;
+}
+.el-input /deep/ .el-input__inner {
+	width: 95%;
+	background-color: #fff0 !important;
+	border-radius: 50px;
+	height: 30px;
+}
+/deep/ .el-form-item__content {
+	line-height: 0;
 }
 .manage {
 	align-items: center;
@@ -170,13 +141,13 @@ export default {
 .userbox {
 	margin-top: 120px;
 	height: 30px;
-	width: 230px;
+	width: 228px;
 	display: flex;
 	margin-left: 18px;
 }
 .pwdbox {
 	height: 30px;
-	width: 225px;
+	width: 228px;
 	display: flex;
 	margin-left: 18px;
 }
@@ -256,7 +227,7 @@ input:-webkit-autofill::first-line {
 	width: 190px;
 	margin-left: 30px;
 	color: #4e655d;
-	margin-top: -5px;
+	// margin-top: -5px;
 	align-items: center;
 }
 .log-box-text {
@@ -320,7 +291,7 @@ input:-webkit-autofill::first-line {
 	color: #4e655d;
 	margin-right: 5px;
 	// margin-left: -10px;
-	margin-top: 3px;
+	margin-top: 5px;
 }
 
 .icon-key:before {

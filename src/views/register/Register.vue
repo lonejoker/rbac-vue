@@ -5,38 +5,32 @@
 			<div class="loginbox">
 				<!-- 左侧的注册盒子 -->
 				<div class="loginbox-in">
-					<div style="
-							justify-content: center;
-							display: flex;
-							font-size: 20px;
-							position: absolute;
-							top: 60px;
-							left: 20px;
-							font-size: 25px;
-						">
-						小白后台管理系统
-					</div>
-					<div class="userbox">
-						<span class="iconfont icon-200yonghu_yonghu"></span>
-						<input class="user" id="user" v-model="name" placeholder="用户名" />
-					</div>
-					<br />
-					<div class="pwdbox">
-						<span class="iconfont icon-yuechi"></span>
-						<input class="pwd" id="password" v-model="pwd" type="password" placeholder="密码" />
-					</div>
-					<br />
-					<div class="pwdbox">
-						<span class="iconfont icon-yuechi"></span>
-						<input class="pwd" id="re_password" v-model="repwd" type="password" placeholder="确认密码" />
-					</div>
-
-					<br />
-					<button type="primary" class="register_btn" @click="register">
-						Register
-					</button>
+					<div class="xblo">小白后台管理系统</div>
+					<el-form :model="registerParam" :rules="rules" ref="registerForm" label-width="0px">
+						<div class="userbox">
+							<span class="iconfont icon-200yonghu_yonghu" style="margin-right: 6px;"></span>
+							<el-form-item prop="username">
+								<el-input v-model="registerParam.username" placeholder="用户名"></el-input>
+							</el-form-item>
+						</div>
+						<br />
+						<div class="pwdbox">
+							<span class="iconfont icon-key1"></span>
+							<el-form-item prop="password">
+								<el-input type="password" v-model="registerParam.password" placeholder="密码"></el-input>
+							</el-form-item>
+						</div>
+						<br />
+						<div class="pwdbox">
+							<span class="iconfont icon-key1"></span>
+							<el-form-item prop="repassword">
+								<el-input v-model="registerParam.repassword" type="password" placeholder="确认密码"></el-input>
+							</el-form-item>
+						</div>
+						<br />
+						</el-form>
+						<button type="primary" class="register_btn" @click="register('registerForm')">注册</button>
 				</div>
-
 				<!-- 右侧的注册盒子 -->
 				<div class="background">
 					<div class="title">
@@ -58,58 +52,37 @@ export default {
 	props: {},
 	data () {
 		return {
-			name: '',
-			pwd: '',
-			repwd: '',
-			user_list: [
-				{
-					username: 'admin',
-					password: '123'
-				}
-			]
+			registerParam: {},
+			rules: {
+				username: [
+					{ required: true, message: '请输入用户名', trigger: 'blur' },
+					{ min: 2, max: 32, message: '请输入2-20位字符', trigger: 'blur' }
+				],
+				password: [
+					{ required: true, message: '请输入密码', trigger: 'blur' },
+					{ min: 6, max: 32, message: '请输入6-32位字符', trigger: 'blur' }
+				],
+				repassword: [
+					{ required: true, message: '请输入密码', trigger: 'blur' },
+					{ min: 6, max: 32, message: '请输入6-32位字符', trigger: 'blur' }
+				]
+			}
 		}
 	},
 	watch: {},
 	computed: {},
 	methods: {
-		register () {
-			var flag = 1
-			//如果用户名已存在，则需要换一个用户名
-			this.user_list.forEach(item => {
-				if (item.username == this.name) {
-					alert('用户已存在,请换一个用户名')
-					flag = 0
+		register (formName) {
+			this.$refs[formName].validate(valid => {
+				if (valid) {
+					console.log(this.registerParam)
+				} else {
+					this.$message.error('请输入账号和密码')
+					this.registerParam = {}
+					return false
 				}
 			})
-			//如果用户名不存在，则继续判断
-			if (flag) {
-				//判断两次输入的密码是否一致，如果密码不一致，则需要重新输入
-				if (this.pwd != this.repwd) {
-					alert('两次输入的密码不一致,请重新输入')
-				}
-				//如果密码也一直，则存到用户列表里面
-				else {
-					var item = {}
-					//获取到用户名
-					item.username = this.name
-					//获取到密码
-					item.password = this.pwd
-					//存储到用户列表
-					this.user_list.push(item)
-					alert('注册成功')
-					//    this.user_list.forEach((item) => {
-					//       console.log( item.username);
-					// })
-
-					this.$router.push({
-						path: '/',
-						query: {
-							list: this.user_list
-						}
-					})
-				}
-			}
-		}
+		},
 	},
 	created () { },
 	mounted () { }
@@ -120,6 +93,15 @@ export default {
 	height: 100%;
 	width: 100%;
 	background-color: #becfca !important;
+}
+.el-input /deep/ .el-input__inner {
+	width: 95%;
+	background-color: #fff0 !important;
+	border-radius: 50px;
+	height: 30px;
+}
+/deep/ .el-form-item__content {
+	line-height: 0;
 }
 .loginbox {
 	display: flex;
@@ -138,13 +120,13 @@ export default {
 .userbox {
 	margin-top: 120px;
 	height: 30px;
-	width: 230px;
+	width: 228px;
 	display: flex;
 	margin-left: 18px;
 }
 .pwdbox {
 	height: 30px;
-	width: 225px;
+	width: 228px;
 	display: flex;
 	margin-left: 18px;
 }
@@ -269,7 +251,7 @@ input:-webkit-autofill::first-line {
 	height: 22px;
 	color: #4e655d;
 	margin-right: 5px;
-	margin-top: 3px;
+	margin-top: 5px;
 }
 
 .icon-key:before {
