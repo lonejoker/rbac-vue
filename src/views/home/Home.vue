@@ -1,15 +1,15 @@
 <template>
 	<el-container>
 		<el-aside width="200px">
-      <Aside></Aside>
-    </el-aside>
+			<Aside></Aside>
+		</el-aside>
 		<el-container>
 			<el-header>
-        <Header></Header>
-      </el-header>
+				<Header></Header>
+			</el-header>
 			<el-main>
-        <router-view></router-view>
-      </el-main>
+				<router-view></router-view>
+			</el-main>
 		</el-container>
 	</el-container>
 </template>
@@ -20,8 +20,8 @@ import Header from '@/components/header/Header.vue'
 export default {
 	name: 'Home',
 	components: {
-    Aside,Header
-  },
+		Aside, Header
+	},
 	props: {},
 	data () {
 		return {
@@ -44,6 +44,7 @@ export default {
 	color: #333;
 	text-align: center;
 	line-height: 60px;
+	padding: 0;
 }
 
 .el-aside {
