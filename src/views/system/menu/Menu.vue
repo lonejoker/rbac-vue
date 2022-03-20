@@ -1,13 +1,13 @@
 <template>
   <div class="wrapper">
-      Index
+      menu
   </div>
 </template>
 
 <script>
 
 export default {
-  name: 'Index',
+  name: 'Menu',
   components: {},
   props: {},
   data() {

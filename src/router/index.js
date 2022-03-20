@@ -16,8 +16,57 @@ const routes = [
 	},
 	{
 		path: "/",
-		name: "home",
-		component: () => import('@/views/index/Index.vue'),
+		name: "index",
+		component: () => import('@/views/home/Home.vue'),
+		redirect: "/index",
+		meta: {
+			title: "首页",
+		},
+		children: [
+			{
+				path: "index",
+				component: () => import('@/views/index/Index.vue'),
+			},
+		],
+	},
+	{
+		path: "/system",
+		name: "system",
+		component: () => import('@/views/home/Home.vue'),
+		redirect: "/system/user",
+		meta: {
+			title: "系统管理",
+		},
+		children: [
+			{
+				path: "user",
+				component: () => import('@/views/system/user/User.vue'),
+				meta: {
+					title: "用户管理",
+				}
+			},
+			{
+				path: "role",
+				component: () => import('@/views/system/role/Role.vue'),
+				meta: {
+					title: "角色管理",
+				}
+			},
+			{
+				path: "menu",
+				component: () => import('@/views/system/menu/Menu.vue'),
+				meta: {
+					title: "权限管理",
+				}
+			},
+			{
+				path: "setting",
+				component: () => import('@/views/system/setting/Setting.vue'),
+				meta: {
+					title: "权限管理",
+				},
+			}
+		],
 	},
 ]
 
@@ -28,14 +77,12 @@ const router = new VueRouter({
 // 设置路由拦截
 router.beforeEach((to, from, next) => {
 	setTimeout(() => {
-		const token = localStorage.getItem("token");
 		if (to.path == "/login" || to.path == "/register") {
 			return next();
-		}else{
-			if (!token || token == "") {
-				return next("/login");
-			}
-			next()
+		}
+		const token = localStorage.getItem("token");
+		if (!token) {
+			return next("/login");
 		}
 		next();
 	}, 100);
