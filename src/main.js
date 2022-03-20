@@ -10,11 +10,13 @@ import "@/assets/css/iconfont.css"
 // 引入elementui
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
+// 引入axios
+import request from "@/utils/ajax.js";
 
 
 Vue.config.productionTip = false
 Vue.use(ElementUI);
-
+Vue.prototype.http = request;
 
 
 new Vue({

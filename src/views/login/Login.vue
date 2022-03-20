@@ -8,9 +8,9 @@
 					<div class="xblo">小白后台管理系统</div>
 					<el-form :model="loginParam" :rules="rules" ref="loginForm" label-width="0px">
 						<div class="userbox">
-							<span class="iconfont icon-200yonghu_yonghu"  style="margin-right: 6px;"></span>
-							<el-form-item prop="username">
-								<el-input v-model="loginParam.username" placeholder="用户名"></el-input>
+							<span class="iconfont icon-200yonghu_yonghu" style="margin-right: 6px;"></span>
+							<el-form-item prop="userName">
+								<el-input v-model="loginParam.userName" placeholder="用户名"></el-input>
 							</el-form-item>
 						</div>
 						<br />
@@ -60,15 +60,18 @@ export default {
 	props: {},
 	data () {
 		return {
-			loginParam: {},
+			loginParam: {
+				userName: 'xb',
+				password: '1',
+			},
 			rules: {
-				username: [
+				userName: [
 					{ required: true, message: '请输入用户名', trigger: 'blur' },
 					{ min: 2, max: 32, message: '请输入2-20位字符', trigger: 'blur' }
 				],
 				password: [
 					{ required: true, message: '请输入密码', trigger: 'blur' },
-					{ min: 6, max: 32, message: '请输入6-32位字符', trigger: 'blur' }
+					{ min: 1, max: 32, message: '请输入1-32位字符', trigger: 'blur' }
 				]
 			}
 		}
@@ -76,19 +79,33 @@ export default {
 	watch: {},
 	computed: {},
 	methods: {
-		register () {
-			this.$router.push('register')
-		},
 		submitLoginForm (formName) {
-			this.$refs[formName].validate(valid => {
+			this.$refs[formName].validate(async valid => {
 				if (valid) {
-					console.log(this.loginParam)
+					// console.log(this.loginParam)
+					const { data: res } = await this.http.post(
+						"/user/login",
+						this.loginParam
+					);
+					// console.log(res);
+					if (res.code !== 200) {
+						this.$message.error("登录失败！", res.msg)
+					} else {
+						localStorage.setItem("token", res.data.token)
+						localStorage.setItem("userInfo", JSON.stringify(res.data.user))
+						localStorage.setItem("roles", JSON.stringify(res.data.roles))
+						this.$message.success("登陆成功！！！");
+						this.$router.push({ path: "/" });
+					}
 				} else {
 					this.$message.error('请输入账号和密码')
 					this.loginParam = {}
 					return false
 				}
 			})
+		},
+		register () {
+			this.$router.push('register')
 		},
 	},
 	created () { },
