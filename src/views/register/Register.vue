@@ -9,8 +9,8 @@
 					<el-form :model="registerParam" :rules="rules" ref="registerForm" label-width="0px">
 						<div class="userbox">
 							<span class="iconfont icon-200yonghu_yonghu" style="margin-right: 6px;"></span>
-							<el-form-item prop="username">
-								<el-input v-model="registerParam.username" placeholder="用户名"></el-input>
+							<el-form-item prop="userName">
+								<el-input v-model="registerParam.userName" placeholder="用户名"></el-input>
 							</el-form-item>
 						</div>
 						<br />
@@ -22,14 +22,29 @@
 						</div>
 						<br />
 						<div class="pwdbox">
-							<span class="iconfont icon-key1"></span>
-							<el-form-item prop="repassword">
-								<el-input v-model="registerParam.repassword" type="password" placeholder="确认密码"></el-input>
+							<span class="iconfont icon-youxiang"></span>
+							<el-form-item prop="email">
+								<el-input v-model="registerParam.email" placeholder="邮箱"></el-input>
 							</el-form-item>
 						</div>
 						<br />
-						</el-form>
-						<button type="primary" class="register_btn" @click="register('registerForm')">注册</button>
+						<div class="pwdbox">
+							<span class="iconfont icon-shoujihaoma"></span>
+							<el-form-item prop="phone">
+								<el-input v-model="registerParam.phone" placeholder="手机号码"></el-input>
+							</el-form-item>
+						</div>
+						<br />
+						<div class="pwdbox">
+							<span class="iconfont icon-tongxingbie"></span>
+							<el-form-item prop="sex" style="margin-left: 40px;">
+								<el-radio v-model="registerParam.radio" label="0">男</el-radio>
+								<el-radio v-model="registerParam.radio" label="1">女</el-radio>
+							</el-form-item>
+						</div>
+						<br />
+					</el-form>
+					<button type="primary" class="register_btn" @click="register('registerForm')">注册</button>
 				</div>
 				<!-- 右侧的注册盒子 -->
 				<div class="background">
@@ -51,10 +66,31 @@ export default {
 	components: {},
 	props: {},
 	data () {
+		// 自定义手机号码验证
+		var checkPhone = (rule, value, callback) => {
+			if (!value) {
+				return callback(new Error('手机号不能为空'));
+			} else {
+				const reg = /^1[3|4|5|7|8][0-9]\d{8}$/
+				// console.log(reg.test(value));
+				if (reg.test(value)) {
+					callback();
+				} else {
+					return callback(new Error('请输入正确的手机号'));
+				}
+			}
+		};
 		return {
-			registerParam: {},
+			radio: '0',
+			registerParam: {
+				// email: '111@qq.com',
+				// password: '1111111',
+				// phone: '15917539607',
+				// radio: '0',
+				// userName: "22"
+			},
 			rules: {
-				username: [
+				userName: [
 					{ required: true, message: '请输入用户名', trigger: 'blur' },
 					{ min: 2, max: 32, message: '请输入2-20位字符', trigger: 'blur' }
 				],
@@ -62,10 +98,11 @@ export default {
 					{ required: true, message: '请输入密码', trigger: 'blur' },
 					{ min: 6, max: 32, message: '请输入6-32位字符', trigger: 'blur' }
 				],
-				repassword: [
-					{ required: true, message: '请输入密码', trigger: 'blur' },
-					{ min: 6, max: 32, message: '请输入6-32位字符', trigger: 'blur' }
-				]
+				email: [
+					{ required: true, message: '请输入邮箱地址', trigger: 'blur' },
+					{ type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
+				],
+				phone: [{ validator: checkPhone, trigger: 'blur' }]
 			}
 		}
 	},
@@ -73,11 +110,27 @@ export default {
 	computed: {},
 	methods: {
 		register (formName) {
-			this.$refs[formName].validate(valid => {
+			this.$refs[formName].validate(async valid => {
 				if (valid) {
 					console.log(this.registerParam)
+					const { data: res } = await this.http.post(
+						"/user/registry",
+						this.registerParam
+					);
+					// console.log(res);
+					if (res.code !== 200) {
+						this.$message.error("注册失败！", res.msg)
+					} else {
+						this.$message.success("注册成功！！！");
+						setTimeout(() => {
+							this.$router.push({ path: "/login" });
+						}, 100);
+						setTimeout(() => {
+							this.registerParam = {}
+						}, 400);
+					}
 				} else {
-					this.$message.error('请输入账号和密码')
+					this.$message.error('请输入注册信息')
 					this.registerParam = {}
 					return false
 				}
@@ -101,7 +154,7 @@ export default {
 	height: 30px;
 }
 /deep/ .el-form-item__content {
-	line-height: 0;
+	line-height: 30px;
 }
 .loginbox {
 	display: flex;
@@ -118,7 +171,7 @@ export default {
 	width: 240px;
 }
 .userbox {
-	margin-top: 120px;
+	margin-top: 85px;
 	height: 30px;
 	width: 228px;
 	display: flex;
