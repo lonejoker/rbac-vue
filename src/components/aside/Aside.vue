@@ -4,7 +4,7 @@
 			<img src="../../assets/image/logo.png" alt="" class="img">
 			<span class="title">xxxx后台管理系统</span>
 		</div>
-		<el-menu :default-active="$route.path" background-color="#333744" text-color="#fff" style="overflow-x: hidden" :collapse="isCollapse" :collapse-transition="false" router >
+		<el-menu :default-active="$router.path" router background-color="#333744" text-color="#fff" style="overflow-x: hidden" :collapse="isCollapse" :collapse-transition="false" >
 			<el-menu-item index="/">
 				<i class="iconfont icon-youxiang"></i>
 				<span slot="title"><span style="margin-left: 5px">首&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;页</span></span>

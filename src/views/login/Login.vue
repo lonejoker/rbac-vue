@@ -79,6 +79,13 @@ export default {
 	watch: {},
 	computed: {},
 	methods: {
+		open1 () {
+			this.$myMsg.notify({
+				content: "登录成功",
+				type: 'success',
+				time: 3000
+			});
+		},
 		submitLoginForm (formName) {
 			this.$refs[formName].validate(async valid => {
 				if (valid) {
@@ -94,7 +101,7 @@ export default {
 						localStorage.setItem("token", res.data.token)
 						localStorage.setItem("userInfo", JSON.stringify(res.data.user))
 						localStorage.setItem("roles", JSON.stringify(res.data.roles))
-						this.$message.success("登陆成功！！！");
+						this.open1()
 						this.$router.push({ path: "/" });
 					}
 				} else {

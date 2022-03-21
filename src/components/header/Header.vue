@@ -14,7 +14,7 @@
 								<el-submenu index="1">
 									<template slot="title"><img src="../../assets/image/logo.png" width="50" height="50" />1212</template>
 									<el-menu-item>个人资料</el-menu-item>
-									<el-menu-item>退出</el-menu-item>
+									<el-menu-item @click="logout">退出</el-menu-item>
 								</el-submenu>
 							</el-menu>
 						</div>
@@ -40,9 +40,23 @@ export default {
 	},
 	watch: {},
 	computed: {},
-	methods: {
-
-	},
+  methods: {
+    logout() {
+      this.http
+          .post("/user/logout")
+          .then((result) => {
+						this.$message.success("退出成功！！！");
+            localStorage.clear();
+						this.$router.push("/login");
+            // resetroute()
+          })
+          .catch((err) => {
+						this.$message.error("退出失败！！！");
+						this.$message.error()
+            console.log(err);
+          });
+    },
+  },
 	created () { },
 	mounted () { }
 };
@@ -64,7 +78,7 @@ export default {
 	box-shadow: 0 0 10px #757575;
 	vertical-align: middle;
 }
-.el-menu--horizontal>.el-submenu .el-submenu__title{
-  line-height: 0;
+.el-menu--horizontal > .el-submenu .el-submenu__title {
+	line-height: 0;
 }
 </style>

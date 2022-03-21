@@ -1,6 +1,7 @@
 // 导入axios请求，解决跨域
 import axios from "axios";
 import { Message } from "element-ui";
+import { MessageBox } from "element-ui";
 
 const request = axios.create({
   // 设置访问根路径
@@ -15,7 +16,7 @@ request.interceptors.request.use(
   (config) => {
     let token = localStorage.getItem("token");
     if (token) {
-      config.headers.Authorization = token;
+      config.headers.token = token;
     }
     // console.log("请求成功拦截器");
     // console.log(config.headers);
@@ -38,11 +39,11 @@ request.interceptors.response.use(
     // console.log("响应成功拦截器");
     if (response.data.code === 401) {
       MessageBox.confirm(response.message, "Confirm logout", {
-        confirmButtonText: "重新登录",
+        confirmButtonText: "退出",
         cancelButtonText: "取消",
         type: "warning",
       });
-      localStorage.removeItem("token");
+      localStorage.clear()
       this.$router.push("/login");
     }
     // 这里如果打开的话，点击退出会有一个错误提示框
@@ -52,7 +53,7 @@ request.interceptors.response.use(
         type: "error",
         duration: 5 * 1000,
       });
-      localStorage.removeItem("token");
+      localStorage.clear()
       this.$router.push("/login");
     } else {
       return response;
