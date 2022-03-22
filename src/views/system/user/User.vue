@@ -60,44 +60,49 @@
 				</el-pagination>
 			</div>
 			<!-- 添加用户 -->
-			<el-dialog title="添加用户" :visible.sync="dialogFormVisibleAdd" width="30%">
-				<el-form label-width="80px" size="small">
-					<el-form-item label="用户名">
-						<el-input v-model.trim="addForm.userName" autocomplete="off"></el-input>
-					</el-form-item>
-					<el-form-item label="密码">
-						<el-input v-model.trim="addForm.password" autocomplete="off"></el-input>
-					</el-form-item>
-					<el-form-item label="角色">
-						<el-select clearable v-model="addForm.roleName" @change="changeRoles" filterable allow-create default-first-option placeholder="请选择角色" style="width: 100%">
-							<el-option v-for="item in roles" :key="item.name" :label="item.name" :value="item.flag"></el-option>
-						</el-select>
-					</el-form-item>
-					<el-form-item label="邮箱">
-						<el-input v-model.trim="addForm.email" autocomplete="off"></el-input>
-					</el-form-item>
-					<el-form-item label="手机号码">
-						<el-input v-model.trim="addForm.phone" autocomplete="off"></el-input>
-					</el-form-item>
-					<el-form-item label="性别">
-						<el-input v-model.trim="addForm.sex" autocomplete="off"></el-input>
-					</el-form-item>
-				</el-form>
-				<div slot="footer" class="dialog-footer">
-					<el-button @click="dialogFormVisibleAdd = false">取 消</el-button>
-					<el-button type="primary" @click="saveUser">确 定</el-button>
-				</div>
-				<div v-show="isChange">
-					<el-card class="box-card">
-						<div slot="header" class="clearfix">
-							<span>卡片名称</span>
-							<el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
+			<el-dialog title="添加用户" :visible.sync="dialogFormVisibleAdd" :width="width" :before-close="handleClose">
+				<el-row :gutter="24">
+					<el-col :span="num24">
+						<el-form label-width="80px" size="small">
+							<el-form-item label="用户名">
+								<el-input v-model.trim="addForm.userName" autocomplete="off"></el-input>
+							</el-form-item>
+							<el-form-item label="密码">
+								<el-input v-model.trim="addForm.password" autocomplete="off"></el-input>
+							</el-form-item>
+							<el-form-item label="角色">
+								<el-select clearable v-model="addForm.roleName" @change="changeRoles" filterable allow-create default-first-option placeholder="请选择角色" style="width: 100%">
+									<el-option v-for="item in roles" :key="item.name" :label="item.name" :value="item.flag"></el-option>
+								</el-select>
+							</el-form-item>
+							<el-form-item label="邮箱">
+								<el-input v-model.trim="addForm.email" autocomplete="off"></el-input>
+							</el-form-item>
+							<el-form-item label="手机号码">
+								<el-input v-model.trim="addForm.phone" autocomplete="off"></el-input>
+							</el-form-item>
+							<el-form-item label="性别">
+								<el-input v-model.trim="addForm.sex" autocomplete="off"></el-input>
+							</el-form-item>
+						</el-form>
+						<div class="dialog-footer footer">
+							<el-button @click="cancelAdd">取 消</el-button>
+							<el-button type="primary" @click="saveUser">确 定</el-button>
 						</div>
-						<div v-for="o in 4" :key="o" class="text item">
-							{{'列表内容 ' + o }}
+					</el-col>
+					<el-col :span="num0">
+						<div v-show="isChange">
+							<el-card class="box-card">
+								<div slot="header" class="clearfix">
+									<span>卡片名称</span>
+								</div>
+								<div v-for="o in 4" :key="o">
+									{{'列表内容 ' + o }}
+								</div>
+							</el-card>
 						</div>
-					</el-card>
-				</div>
+					</el-col>
+				</el-row>
 			</el-dialog>
 		</el-card>
 	</div>
@@ -111,6 +116,9 @@ export default {
 	props: {},
 	data () {
 		return {
+			width: '30%',
+			num24: '24',
+			num0: '0',
 			pageNum: 1,
 			pageSize: 5,
 			total: 0,
@@ -128,7 +136,8 @@ export default {
 				name: 'JavaScript',
 				flag: 'JavaScript'
 			}],
-			isChange: false
+			isChange: false,
+			roleName: ''
 		};
 	},
 	watch: {},
@@ -181,19 +190,66 @@ export default {
 		// 提交数据
 		saveUser () {
 			console.log(121212)
+			if (this.roleName == '') {
+				this.addForm.roleName = ''
+			}
 			console.log(this.addForm);
 		},
 		// 添加用户弹窗
 		addUser () {
 			this.dialogFormVisibleAdd = true
+			this.num24 = 24
+			this.num0 = 1
 			this.addForm = {}
 		},
+		// 当选中的值发生改变时
 		changeRoles (e) {
-			console.log(222222);
-			this.isChange = true
-      if(e == ''){
-        this.isChange = false
-      }
+			if (e == '') {
+				this.isChange = false
+				this.dialogStatus()
+			} else {
+				this.isChange = true
+				this.width = '60%'
+				this.num24 = 12
+				this.num0 = 12
+				this.roleName = e
+			}
+		},
+		// 点击旁边判断是否关闭弹窗
+		handleClose (done) {
+			this.$confirm('确认关闭？')
+				.then(_ => {
+					done();
+					setTimeout(() => {
+						this.addForm = {}
+						this.addForm.roleName = ''
+					}, 100);
+					setTimeout(() => {
+						this.dialogStatus()
+						this.isChange = false
+					}, 180)
+				})
+				.catch(_ => { });
+		},
+		// 取消添加用户
+		cancelAdd () {
+			setTimeout(() => {
+				this.dialogFormVisibleAdd = false
+			}, 25);
+			setTimeout(() => {
+				this.addForm = {}
+				this.addForm.roleName = ''
+			}, 140);
+			setTimeout(() => {
+				this.dialogStatus()
+				this.isChange = false
+			}, 220)
+		},
+		// 封装关闭弹窗时的动作
+		dialogStatus () {
+			this.num24 = 24
+			this.width = '30%'
+			this.num0 = 1
 		}
 	},
 	created () {
@@ -222,5 +278,8 @@ export default {
 
 .box-card {
 	width: 480px;
+}
+.footer {
+	float: right;
 }
 </style>

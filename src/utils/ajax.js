@@ -19,14 +19,14 @@ request.interceptors.request.use(
       config.headers.token = token;
     }
     // console.log("请求成功拦截器");
-    // console.log(config.headers);
+    // console.log(config);
     // console.log("请求成功拦截器");
     return config;
   },
   (error) => {
-    // console.log("请求失败拦截器");
-    // console.log(error);
-    // console.log("请求失败拦截器");
+    console.log("请求失败拦截器");
+    console.log(error);
+    console.log("请求失败拦截器");
     return Promise.reject(error);
   }
 );
@@ -35,16 +35,17 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   (response) => {
     // console.log("响应成功拦截器");
-    // console.log(response);
+    // console.log(response.data.code);
     // console.log("响应成功拦截器");
-    if (response.data.code === 401) {
-      MessageBox.confirm(response.message, "Confirm logout", {
-        confirmButtonText: "退出",
-        cancelButtonText: "取消",
-        type: "warning",
-      });
+    if (response.data.code == 401) {
+      var that = this;
+      // MessageBox.confirm(response.message, "Confirm logout", {
+      //   confirmButtonText: "退出",
+      //   cancelButtonText: "取消",
+      //   type: "warning",
+      // });
       localStorage.clear()
-      this.$router.push("/login");
+      that.$router.push({ path: "/login" });
     }
     // 这里如果打开的话，点击退出会有一个错误提示框
     if (response.data.code === 403) {

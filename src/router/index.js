@@ -77,14 +77,16 @@ const router = new VueRouter({
 // 设置路由拦截
 router.beforeEach((to, from, next) => {
 	setTimeout(() => {
+		const token = localStorage.getItem("token");
 		if (to.path == "/login" || to.path == "/register") {
 			return next();
+		}else{
+			if (!token || token == '') {
+				 next("/login");
+			}else{
+				next();
+			}
 		}
-		const token = localStorage.getItem("token");
-		if (!token) {
-			return next("/login");
-		}
-		next();
 	}, 100);
 });
 
