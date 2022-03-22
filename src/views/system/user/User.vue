@@ -72,7 +72,7 @@
 							</el-form-item>
 							<el-form-item label="角色">
 								<el-select clearable v-model="addForm.roleName" @change="changeRoles" filterable allow-create default-first-option placeholder="请选择角色" style="width: 100%">
-									<el-option v-for="item in roles" :key="item.name" :label="item.name" :value="item.flag"></el-option>
+									<el-option v-for="value,key,index in rolesList" :key="key" :label="index" :value="value"></el-option>
 								</el-select>
 							</el-form-item>
 							<el-form-item label="邮箱">
@@ -94,10 +94,10 @@
 						<div v-show="isChange">
 							<el-card class="box-card">
 								<div slot="header" class="clearfix">
-									<span>卡片名称</span>
+									<span>权限列表</span>
 								</div>
-								<div v-for="o in 4" :key="o">
-									{{'列表内容 ' + o }}
+								<div v-for="value in menuList" :key="value">
+									<el-tag size="small" style="margin: 2px;">{{value}}</el-tag>
 								</div>
 							</el-card>
 						</div>
@@ -116,7 +116,7 @@ export default {
 	props: {},
 	data () {
 		return {
-			width: '30%',
+			width: '20%',
 			num24: '24',
 			num0: '0',
 			pageNum: 1,
@@ -137,7 +137,9 @@ export default {
 				flag: 'JavaScript'
 			}],
 			isChange: false,
-			roleName: ''
+			roleName: '',
+			rolesList: [],
+			menuList: []
 		};
 	},
 	watch: {},
@@ -201,6 +203,7 @@ export default {
 			this.num24 = 24
 			this.num0 = 1
 			this.addForm = {}
+			this.getRolesList()
 		},
 		// 当选中的值发生改变时
 		changeRoles (e) {
@@ -209,10 +212,11 @@ export default {
 				this.dialogStatus()
 			} else {
 				this.isChange = true
-				this.width = '60%'
+				this.width = '40%'
 				this.num24 = 12
 				this.num0 = 12
 				this.roleName = e
+				this.getMenuList(this.roleName)
 			}
 		},
 		// 点击旁边判断是否关闭弹窗
@@ -248,8 +252,30 @@ export default {
 		// 封装关闭弹窗时的动作
 		dialogStatus () {
 			this.num24 = 24
-			this.width = '30%'
+			this.width = '20%'
 			this.num0 = 1
+		},
+		// 获取角色列表
+		getRolesList () {
+			this.http.get("/user/getRolesName").then((result) => {
+				if (result.data.code == 200) {
+					this.rolesList = result.data.data
+				}
+			}).catch((err) => {
+				this.$message.error("获取角色列表失败：", err)
+			});
+		},
+		// 获取权限列表
+		getMenuList (roleName) {
+			this.http.get("/user/getMenuName", {
+				params: {
+					roleName: roleName
+				}
+			}).then((result) => {
+				this.menuList = result.data.data
+			}).catch((err) => {
+				this.$message.error("获取权限列表失败：", err)
+			});
 		}
 	},
 	created () {
@@ -277,7 +303,7 @@ export default {
 }
 
 .box-card {
-	width: 480px;
+	width: 300px;
 }
 .footer {
 	float: right;
