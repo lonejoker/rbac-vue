@@ -49,13 +49,14 @@ request.interceptors.response.use(
     }
     // 这里如果打开的话，点击退出会有一个错误提示框
     if (response.data.code === 403) {
-      Message({
-        message: response.message || "此次请求失败：" + response.data.msg,
-        type: "error",
-        duration: 5 * 1000,
-      });
+      var that = this;
+      // Message({
+      //   message: response.message || "此次请求失败：" + response.data.msg,
+      //   type: "error",
+      //   duration: 5 * 1000,
+      // });
       localStorage.clear()
-      this.$router.push("/login");
+      that.$router.push({ path: "/login" });
     } else {
       return response;
     }

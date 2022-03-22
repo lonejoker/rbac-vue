@@ -9,15 +9,24 @@
 			</div>
 			<div style="margin-bottom: 10px">
 				<el-button type="primary" @click="addUser"><i class="el-icon-circle-plus"></i>添加</el-button>
-				<el-button type="danger" slot="reference"><i class="el-icon-delete-solid"></i>批量删除</el-button>
+        <el-popconfirm
+            style="margin-left: 8px"
+            confirm-button-text='确定'
+            cancel-button-text='取消'
+            icon="el-icon-info"
+            icon-color="red"
+            title="你真的确定要删除该数据吗？"
+            @confirm="delAll">
+          <el-button type="danger" slot="reference"><i class="el-icon-delete-solid"></i>批量删除</el-button>
+        </el-popconfirm>
 			</div>
-			<el-table :data="userData" stripe style="width: 100%" ref="multipleTable">
+			<el-table :data="userData" stripe style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
 				<el-table-column type="selection" width="55"></el-table-column>
 				<el-table-column prop="id" label="序号" width="80" align="center">
 				</el-table-column>
 				<el-table-column prop="nickName" label="用户昵称" width="150" align="center">
 				</el-table-column>
-				<el-table-column prop="userAvatar" label="用户头像" width="140" align="center">
+				<el-table-column prop="userAvatar" label="用户头像" width="120" align="center">
 					<template slot-scope="scope">
 						<img :src="scope.row.userAvatar" width="50" height="50" />
 					</template>
@@ -36,8 +45,8 @@
 						<el-tag v-else type="success">普通用户</el-tag>
 					</template>
 				</el-table-column>
-				<el-table-column prop="roleName" label="用户角色" width="130" align="center"></el-table-column>
-				<el-table-column prop="status" label="用户状态" width="140" align="center">
+				<el-table-column prop="roleName" label="用户角色" width="160" align="center"></el-table-column>
+				<el-table-column prop="status" label="用户状态" width="130" align="center">
 					<template slot-scope="scope">
 						<el-tag v-if="scope.row.status == 0">正常</el-tag>
 						<el-tag v-else type="danger">禁用</el-tag>
@@ -47,9 +56,16 @@
 					<template slot-scope="scope">
 						<el-button type="warning" icon="el-icon-edit">修改分类状态</el-button>
 						<el-button type="success" icon="el-icon-edit">编辑</el-button>
-						<el-popconfirm style="margin-left: 8px" confirm-button-text='确定' cancel-button-text='取消' icon="el-icon-info" icon-color="red" title="你真的确定要删除该数据吗？">
-							<el-button type="danger" icon="el-icon-delete" slot="reference">删除</el-button>
-						</el-popconfirm>
+           <el-popconfirm
+                style="margin-left: 8px"
+                confirm-button-text='确定'
+                cancel-button-text='取消'
+                icon="el-icon-info"
+                icon-color="red"
+                title="你真的确定要删除该数据吗？"
+                @confirm="userDel(scope.row.id)">
+              <el-button   type="danger" icon="el-icon-delete" slot="reference">删除</el-button>
+            </el-popconfirm>
 					</template>
 				</el-table-column>
 			</el-table>
@@ -82,7 +98,8 @@
 								<el-input v-model.trim="addForm.phone" autocomplete="off"></el-input>
 							</el-form-item>
 							<el-form-item label="性别">
-								<el-input v-model.trim="addForm.sex" autocomplete="off"></el-input>
+								<el-radio v-model="addForm.radio" label="0">男</el-radio>
+								<el-radio v-model="addForm.radio" label="1">女</el-radio>
 							</el-form-item>
 						</el-form>
 						<div class="dialog-footer footer">
@@ -139,7 +156,9 @@ export default {
 			isChange: false,
 			roleName: '',
 			rolesList: [],
-			menuList: []
+			menuList: [],
+			radio: '0',
+			multipleSelection: [],
 		};
 	},
 	watch: {},
@@ -190,12 +209,21 @@ export default {
 			})
 		},
 		// 提交数据
-		saveUser () {
+		async saveUser () {
 			console.log(121212)
 			if (this.roleName == '') {
 				this.addForm.roleName = ''
 			}
-			console.log(this.addForm);
+			// console.log(this.addForm);
+		await	this.http.post("/sysUser/registrys", this.addForm).then((result) => {
+				if(result.data.code == 200){
+					this.$message.success("添加用户成功")
+					this.getUserInfo()
+					this.cancelAdd()
+				}
+			}).catch((err) => {
+				this.$message.error("添加用户失败：", err)
+			});
 		},
 		// 添加用户弹窗
 		addUser () {
@@ -257,7 +285,7 @@ export default {
 		},
 		// 获取角色列表
 		getRolesList () {
-			this.http.get("/user/getRolesName").then((result) => {
+			this.http.get("/sysUser/getRolesName").then((result) => {
 				if (result.data.code == 200) {
 					this.rolesList = result.data.data
 				}
@@ -267,7 +295,7 @@ export default {
 		},
 		// 获取权限列表
 		getMenuList (roleName) {
-			this.http.get("/user/getMenuName", {
+			this.http.get("/sysUser/getMenuName", {
 				params: {
 					roleName: roleName
 				}
@@ -276,7 +304,40 @@ export default {
 			}).catch((err) => {
 				this.$message.error("获取权限列表失败：", err)
 			});
-		}
+		},
+		// 批量删除用户
+		delAll(){
+      let ids = this.multipleSelection.map(v => v.id)
+      if (ids == "" || ids == null) {
+        this.$message.error("请选择要删除的用户");
+        return
+      }
+      this.http.post('/sysUser/delSysUserAll/' + ids)
+          .then(res => {
+            if (res.data.code == 200) {
+              this.$message.success("批量删除用户成功");
+              this.getUserInfo()
+            } else {
+              this.$message.error("批量删除用户失败");
+            }
+          })
+    },
+		// 负责批量删除选中
+		    handleSelectionChange(val) {
+      this.multipleSelection = val
+    },
+		// 删除单个用户
+		userDel(id){
+      this.http.delete('/sysUser/delSysUser/' + id)
+          .then(res => {
+            if (res.data.code == 200) {
+              this.$message.success("删除用户成功");
+              this.getUserInfo()
+            } else {
+              this.$message.error("删除用户失败");
+            }
+          })
+    },
 	},
 	created () {
 		this.getUserInfo()
