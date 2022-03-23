@@ -9,16 +9,9 @@
 			</div>
 			<div style="margin-bottom: 10px">
 				<el-button type="primary" @click="addUser"><i class="el-icon-circle-plus"></i>添加</el-button>
-        <el-popconfirm
-            style="margin-left: 8px"
-            confirm-button-text='确定'
-            cancel-button-text='取消'
-            icon="el-icon-info"
-            icon-color="red"
-            title="你真的确定要删除该数据吗？"
-            @confirm="delAll">
-          <el-button type="danger" slot="reference"><i class="el-icon-delete-solid"></i>批量删除</el-button>
-        </el-popconfirm>
+				<el-popconfirm style="margin-left: 8px" confirm-button-text='确定' cancel-button-text='取消' icon="el-icon-info" icon-color="red" title="你真的确定要删除该数据吗？" @confirm="delAll">
+					<el-button type="danger" slot="reference"><i class="el-icon-delete-solid"></i>批量删除</el-button>
+				</el-popconfirm>
 			</div>
 			<el-table :data="userData" stripe style="width: 100%" ref="multipleTable" @selection-change="handleSelectionChange">
 				<el-table-column type="selection" width="55"></el-table-column>
@@ -56,16 +49,9 @@
 					<template slot-scope="scope">
 						<el-button type="warning" icon="el-icon-edit">修改分类状态</el-button>
 						<el-button type="success" icon="el-icon-edit">编辑</el-button>
-           <el-popconfirm
-                style="margin-left: 8px"
-                confirm-button-text='确定'
-                cancel-button-text='取消'
-                icon="el-icon-info"
-                icon-color="red"
-                title="你真的确定要删除该数据吗？"
-                @confirm="userDel(scope.row.id)">
-              <el-button   type="danger" icon="el-icon-delete" slot="reference">删除</el-button>
-            </el-popconfirm>
+						<el-popconfirm style="margin-left: 8px" confirm-button-text='确定' cancel-button-text='取消' icon="el-icon-info" icon-color="red" title="你真的确定要删除该数据吗？" @confirm="userDel(scope.row.id)">
+							<el-button type="danger" icon="el-icon-delete" slot="reference">删除</el-button>
+						</el-popconfirm>
 					</template>
 				</el-table-column>
 			</el-table>
@@ -202,7 +188,24 @@ export default {
 				}
 			}).then(res => {
 				if (res.data.code == 200) {
-					// console.log(res)
+					this.userData = res.data.data.records
+					this.total = res.data.data.total
+					// 单条删除，删除最后一条时不跳转会前一页
+					const totalPage = Math.ceil((this.total - 1) / this.pageSize) // 总页数
+					this.pageNum = this.pageNum > totalPage ? totalPage : this.pageNum
+					this.pageNum = this.pageNum < 1 ? 1 : this.pageNum
+				}
+			})
+		},
+		// 获取用户们信息
+		getUserInfos () {
+			this.http.get("/sysUser/pageAll", {
+				params: {
+					pageNum: this.pageNum,
+					pageSize: this.pageSize
+				}
+			}).then(res => {
+				if (res.data.code == 200) {
 					this.userData = res.data.data.records
 					this.total = res.data.data.total
 				}
@@ -215,8 +218,8 @@ export default {
 				this.addForm.roleName = ''
 			}
 			// console.log(this.addForm);
-		await	this.http.post("/sysUser/registrys", this.addForm).then((result) => {
-				if(result.data.code == 200){
+			await this.http.post("/sysUser/registrys", this.addForm).then((result) => {
+				if (result.data.code == 200) {
 					this.$message.success("添加用户成功")
 					this.getUserInfo()
 					this.cancelAdd()
@@ -306,38 +309,39 @@ export default {
 			});
 		},
 		// 批量删除用户
-		delAll(){
-      let ids = this.multipleSelection.map(v => v.id)
-      if (ids == "" || ids == null) {
-        this.$message.error("请选择要删除的用户");
-        return
-      }
-      this.http.post('/sysUser/delSysUserAll/' + ids)
-          .then(res => {
-            if (res.data.code == 200) {
-              this.$message.success("批量删除用户成功");
-              this.getUserInfo()
-            } else {
-              this.$message.error("批量删除用户失败");
-            }
-          })
-    },
+		delAll () {
+			let ids = this.multipleSelection.map(v => v.id)
+			if (ids == "" || ids == null) {
+				this.$message.error("请选择要删除的用户");
+				return
+			}
+			this.http.post('/sysUser/delSysUserAll/' + ids)
+				.then(res => {
+					if (res.data.code == 200) {
+						this.$message.success("批量删除用户成功");
+						this.getUserInfos()
+					} else {
+						this.$message.error("批量删除用户失败");
+					}
+				})
+		},
 		// 负责批量删除选中
-		    handleSelectionChange(val) {
-      this.multipleSelection = val
-    },
+		handleSelectionChange (val) {
+			this.multipleSelection = val
+		},
 		// 删除单个用户
-		userDel(id){
-      this.http.delete('/sysUser/delSysUser/' + id)
-          .then(res => {
-            if (res.data.code == 200) {
-              this.$message.success("删除用户成功");
-              this.getUserInfo()
-            } else {
-              this.$message.error("删除用户失败");
-            }
-          })
-    },
+		userDel (id) {
+			this.http.delete('/sysUser/delSysUser/' + id)
+				.then(res => {
+					console.log(res);
+					if (res.data.code == 200) {
+						this.$message.success("删除用户成功");
+						this.getUserInfo()
+					} else {
+						this.$message.error("删除用户失败");
+					}
+				})
+		},
 	},
 	created () {
 		this.getUserInfo()
