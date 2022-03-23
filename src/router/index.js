@@ -27,6 +27,13 @@ const routes = [
 				path: "index",
 				component: () => import('@/views/index/Index.vue'),
 			},
+			{
+        path: "files",
+        component: ()=>import('@/views/files/Files.vue'),
+        meta: {
+          title: "文件管理",
+        },
+      },
 		],
 	},
 	{

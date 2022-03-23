@@ -48,7 +48,7 @@
 				<el-table-column prop="con" label="操作" width="400" align="center">
 					<template slot-scope="scope">
 						<el-button type="warning" icon="el-icon-edit">修改分类状态</el-button>
-						<el-button type="success" icon="el-icon-edit">编辑</el-button>
+						<el-button type="success" icon="el-icon-edit" @click="updateUserInfo(scope.row)">编辑</el-button>
 						<el-popconfirm style="margin-left: 8px" confirm-button-text='确定' cancel-button-text='取消' icon="el-icon-info" icon-color="red" title="你真的确定要删除该数据吗？" @confirm="userDel(scope.row.id)">
 							<el-button type="danger" icon="el-icon-delete" slot="reference">删除</el-button>
 						</el-popconfirm>
@@ -62,7 +62,7 @@
 				</el-pagination>
 			</div>
 			<!-- 添加用户 -->
-			<el-dialog title="添加用户" :visible.sync="dialogFormVisibleAdd" :width="width" :before-close="handleClose">
+			<el-dialog title="添加用户" :visible.sync="dialogFormVisibleAdd" :width="width" :before-close="handleCloseAdd">
 				<el-row :gutter="24">
 					<el-col :span="num24">
 						<el-form label-width="80px" size="small">
@@ -107,6 +107,54 @@
 					</el-col>
 				</el-row>
 			</el-dialog>
+			<!-- 修改用户：昵称，密码，头像，邮箱，号码，角色 -->
+			<el-dialog title="添加用户" :visible.sync="dialogFormVisibleUpdate" :width="width" :before-close="handleCloseUpdate">
+				<el-row :gutter="24">
+					<el-col :span="num24">
+						<el-form label-width="80px" size="small">
+							<el-form-item label="昵称">
+								<el-input v-model.trim="updateForm.nickName" autocomplete="off"></el-input>
+							</el-form-item>
+							<el-form-item>
+								<el-upload class="avatar-uploader" action="http://localhost:9999/sysFiles/uploadFile" :show-file-list="false" :on-success="handleAvatarSuccess" accept=".jpg, .png" :limit="1" >
+									<img v-if="updateForm.userAvatar" :src="updateForm.userAvatar" class="avatar">
+									<i v-else class="el-icon-plus avatar-uploader-icon"></i>
+								</el-upload>
+							</el-form-item>
+							<el-form-item label="密码">
+								<el-input v-model.trim="updateForm.password" autocomplete="off"></el-input>
+							</el-form-item>
+							<el-form-item label="角色">
+								<el-select clearable v-model="updateForm.roleName" @change="changeRoles" filterable allow-create default-first-option placeholder="请选择角色" style="width: 100%">
+									<el-option v-for="value,key,index in rolesList" :key="key" :label="index" :value="value"></el-option>
+								</el-select>
+							</el-form-item>
+							<el-form-item label="邮箱">
+								<el-input v-model.trim="updateForm.email" autocomplete="off"></el-input>
+							</el-form-item>
+							<el-form-item label="手机号码">
+								<el-input v-model.trim="updateForm.phone" autocomplete="off"></el-input>
+							</el-form-item>
+						</el-form>
+						<div class="dialog-footer footer">
+							<el-button @click="cancelUpdate">取 消</el-button>
+							<el-button type="primary" @click="updateUser">确 定</el-button>
+						</div>
+					</el-col>
+					<el-col :span="num0">
+						<div v-show="isChange">
+							<el-card class="box-card">
+								<div slot="header" class="clearfix">
+									<span>权限列表</span>
+								</div>
+								<div v-for="value in menuList" :key="value">
+									<el-tag size="small" style="margin: 2px;">{{value}}</el-tag>
+								</div>
+							</el-card>
+						</div>
+					</el-col>
+				</el-row>
+			</el-dialog>
 		</el-card>
 	</div>
 </template>
@@ -128,7 +176,9 @@ export default {
 			nickName: '',
 			userData: [],
 			dialogFormVisibleAdd: false,
+			dialogFormVisibleUpdate: false,
 			addForm: {},
+			updateForm: {},
 			roles: [{
 				name: 'HTML',
 				flag: 'HTML'
@@ -211,7 +261,7 @@ export default {
 				}
 			})
 		},
-		// 提交数据
+		// 提交添加用户数据
 		async saveUser () {
 			console.log(121212)
 			if (this.roleName == '') {
@@ -250,8 +300,8 @@ export default {
 				this.getMenuList(this.roleName)
 			}
 		},
-		// 点击旁边判断是否关闭弹窗
-		handleClose (done) {
+		// 添加用户时点击旁边判断是否关闭弹窗
+		handleCloseAdd (done) {
 			this.$confirm('确认关闭？')
 				.then(_ => {
 					done();
@@ -308,6 +358,51 @@ export default {
 				this.$message.error("获取权限列表失败：", err)
 			});
 		},
+		// 修改用户弹窗
+		updateUserInfo (row) {
+			this.dialogFormVisibleUpdate = true
+			this.width = '40%'
+			this.num24 = 12
+			this.num0 = 12
+			this.isChange = true
+			this.getMenuList(row.roleName)
+			this.getRolesList()
+			this.updateForm = JSON.parse(JSON.stringify(row))
+			this.updateForm.password = ''
+		},
+		// 修改用户时点击旁边判断是否关闭弹窗
+		handleCloseUpdate (done) {
+			this.$confirm('确认关闭？')
+				.then(_ => {
+					done();
+				})
+				.catch(_ => { });
+		},
+		// 取消修改用户
+		cancelUpdate () {
+			setTimeout(() => {
+				this.dialogFormVisibleUpdate = false
+			}, 25);
+			setTimeout(() => {
+				this.updateForm.password = ''
+			}, 140)
+			setTimeout(() => {
+				this.width = '20%'
+				this.num24 = 24
+				this.num0 = 1
+				this.isChange = false
+			}, 220);
+		},
+		// 提交修改用户数据
+		updateUser () {
+			console.log(this.updateForm);
+			this.http.post("/sysUser/updateSysUser",this.updateForm).then((result) => {
+				this.getUserInfo()
+				this.cancelUpdate()
+			}).catch((err) => {
+				console.log(err);
+			});
+		},
 		// 批量删除用户
 		delAll () {
 			let ids = this.multipleSelection.map(v => v.id)
@@ -342,6 +437,27 @@ export default {
 					}
 				})
 		},
+		// 成功时
+		handleAvatarSuccess (res) {
+			console.log(res)
+			this.updateForm.userAvatar = res
+		},
+		// 上传格式
+		beforeAvatarUpload (file) {
+			const isJP = file.type === 'png/jpg';
+			const isLt5M = file.size / 1024 / 1024 < 5;
+			if (!isJP) {
+				this.$message.error('上传头像图片只能是 PNG/JPG 格式!');
+			}
+			if (!isLt5M) {
+				this.$message.error('上传头像图片大小不能超过 5MB!');
+			}
+			return isJP && isLt5M;
+		},
+		// 文件超出上传个数
+		handleExceed (files, fileList) {
+			this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+		},
 	},
 	created () {
 		this.getUserInfo()
@@ -372,5 +488,29 @@ export default {
 }
 .footer {
 	float: right;
+}
+.avatar-uploader .el-upload {
+	border: 1px dashed #d9d9d9;
+	border-radius: 6px;
+	cursor: pointer;
+	position: relative;
+	overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+	border-color: #409eff;
+}
+.avatar-uploader-icon {
+	font-size: 28px;
+	color: #8c939d;
+	width: 100px;
+	height: 100px;
+	line-height: 100px;
+	text-align: center;
+}
+.avatar {
+	width: 100px;
+	height: 100px;
+	margin-left: 80px;
+	display: block;
 }
 </style>

@@ -4,10 +4,14 @@
 			<img src="../../assets/image/logo.png" alt="" class="img">
 			<span class="title">xxxx后台管理系统</span>
 		</div>
-		<el-menu :default-active="$router.path" router background-color="#333744" text-color="#fff" style="overflow-x: hidden" :collapse="isCollapse" :collapse-transition="false" >
+		<el-menu :default-active="$router.path" router background-color="#333744" text-color="#fff" style="overflow-x: hidden" :collapse="isCollapse" :collapse-transition="false">
 			<el-menu-item index="/">
 				<i class="iconfont icon-youxiang"></i>
 				<span slot="title"><span style="margin-left: 5px">首&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;页</span></span>
+			</el-menu-item>
+			<el-menu-item index="/files">
+				<i class="iconfont icon-youxiang"></i>
+				<span slot="title"><span style="margin-left: 5px">文件管理</span></span>
 			</el-menu-item>
 			<el-submenu index="2">
 				<template slot="title">
@@ -33,7 +37,6 @@
 					</el-menu-item>
 				</el-menu-item-group>
 			</el-submenu>
-		</el-menu>
 		</el-menu>
 	</div>
 </template>
@@ -78,10 +81,10 @@ export default {
 .el-menu {
 	border-right: none !important;
 }
-.title{
-  color: aliceblue;
+.title {
+	color: aliceblue;
 }
-/deep/ .el-menu-item-group__title{
-  padding: 0;
+/deep/ .el-menu-item-group__title {
+	padding: 0;
 }
 </style>
