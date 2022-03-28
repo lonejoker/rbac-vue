@@ -7,7 +7,15 @@
 			<el-button class="mrb" @click="reset">重置</el-button>
 		</div>
 		<div style="margin-bottom: 10px">
-			<el-upload action="http://localhost:9999/sysFiles/uploadFile" :show-file-list="false" accept=".png" :on-success="handleFileUploadSuccess" style="display: inline-block">
+			<el-upload v-if="this.jp.indexOf(this.typeName)>=0" action="http://localhost:9999/sysFiles/uploadFile" :before-upload="beforeUpload" :accept="acc" :show-file-list="false" 
+				:on-success="handleFileUploadSuccess" style="display: inline-block">
+				<el-button type="primary" class="ml-5">上传文件 <i class="el-icon-top"></i></el-button>
+			</el-upload>
+			<!-- <el-upload v-else-if="this.typeName == 'jpg'" action="http://localhost:9999/sysFiles/uploadFile" :show-file-list="false" accept=".jpg" :on-success="handleFileUploadSuccess" style="display: inline-block">
+				<el-button type="primary" class="ml-5">上传文件 <i class="el-icon-top"></i></el-button>
+			</el-upload> -->
+			<el-upload v-else="this.typeName == 'mp4'" action="http://localhost:9999/sysFiles/uploadFile" :show-file-list="false" :before-upload="beforeUploads"  :on-success="handleFileUploadSuccess"
+				style="display: inline-block">
 				<el-button type="primary" class="ml-5">上传文件 <i class="el-icon-top"></i></el-button>
 			</el-upload>
 			<el-popconfirm style="margin-left: 8px" confirm-button-text='确定' cancel-button-text='取消' icon="el-icon-info" icon-color="red" title="你真的确定要删除该数据吗？" @confirm="delAll">
@@ -48,6 +56,11 @@
 				layout="total, sizes, prev, pager, next, jumper" :total="total">
 			</el-pagination>
 		</div>
+		<el-tabs v-model="activeName" @tab-click="handleClick">
+			<el-tab-pane v-for="item in list" :key="item.name" :label="item.label" :name="item.name">
+				{{item.name}}
+			</el-tab-pane>
+		</el-tabs>
 	</div>
 </template>
 
@@ -63,6 +76,17 @@ export default {
 	},
 	data () {
 		return {
+			activeName: '11',
+			list: [{
+				label: '2211',
+				name: '11'
+			},{
+				label: '22',
+				name: '22'
+			},{
+				label: '33',
+				name: '33'
+			}],
 			multipleSelection: [], //用于存储选中行数据的集合
 			value: true,
 			pageNum: 1,
@@ -70,6 +94,12 @@ export default {
 			filesInfo: [],
 			name: '',
 			total: 0,
+			typeName: '',
+			jp: ['jpg', 'png'],
+			jps: ['jpg','png'],
+			jpv: ['mp4','avi'],
+			jpss: [".jpg",".png"],
+			acc: '.jpg, .jpeg, .png, .gif, .bmp, .JPG, .JPEG, .PBG, .GIF, .BMP'
 		};
 	},
 	watch: {
@@ -77,12 +107,38 @@ export default {
 			handler (val) {
 				console.log(val)
 				this.types = val
+				this.typeName = val
 			},
-			// immediate: true,
+			immediate: true,
 		}
 	},
 	computed: {},
 	methods: {
+		handleClick(tab, event) {
+        console.log(tab, event);
+      },
+		beforeUpload (file) {
+			console.log(file)
+			var testmsg = file.name.substring(file.name.lastIndexOf('.') + 1)         
+			if (!this.jps.includes(testmsg)) {
+				this.$message({
+					message: '上传文件只能是 png、jpg格式!',
+					type: 'warning'
+				});
+			}        
+			return this.jps.includes(testmsg)
+		},
+				beforeUploads (file) {
+			console.log(file)
+			var testmsg = file.name.substring(file.name.lastIndexOf('.') + 1)         
+			if (!this.jpv.includes(testmsg)) {
+				this.$message({
+					message: '上传文件只能是 png、jpg格式!',
+					type: 'warning'
+				});
+			}        
+			return this.jpv.includes(testmsg)
+		},
 		getFilesInfo () {
 			this.http.get('/sysFiles/getFilesByType', {
 				params: {
